@@ -5,6 +5,7 @@
 	<title>Document</title>
 </head>
 <body>
+	<!-- date 4-22 -->
 	<!-- 学习Cocos Creator -->
 	4-18
 	几个属性面板
@@ -27,8 +28,98 @@
 	Cocos Creator  动作 简单来说就是 节点的位移、缩放和旋转。
 	// example
  	* var actionTo = cc.moveBy(2, cc.v2(windowSize.width - 40, windowSize.height - 40));
+ 	Prefab（预制） 资源
+ 	层级管理器 中将 star 节点拖拽到 资源管理器 中的 assets 文件夹下，就生成了名叫 star 的 Prefab 资源
+ 	
+ 	创建场景
+ 	方法一：选择主菜单：文件/新建场景  方法二：在 资源管理器 中点击创建菜单，创建新场景
+	保存场景
+	方法一：使用快捷键 Ctrl + S (Windows) 或 Command + S (Mac)  方法二：选择主菜单：文件/保存场景
+	
+	切换场景
+	在 资源管理器 中，双击需要打开的场景
+	修改场景资源自动释放策略：如果项目中的场景很多，随着新场景的切换，内存占用就会不断上升。除了使用 cc.loader.release 等 API 来精确释放不使用的资源，
 
+	图像资源（Texture）
 
+	Texture 和 SpriteFrame 资源类型
+	SpriteFrame 是核心渲染组件 Sprite 所使用的资源，设置或替换 Sprite 组件中的 spriteFrame 属性，就可以切换显示的图像。
+	
+	预制资源Prefab
+	在场景中编辑好节点后，直接将节点从 层级管理器 拖到 资源管理器
+	保存预制：在场景中修改了预制实例后，在 属性检查器 中直接点击 保存，即可保存对应的预制资源
+	还原预制：在场景中修改了预制实例后，在 属性检查器 中直接点击 回退，即可将预制对象还原为资源中的状态
+
+	图集资源 Atlas
+	图集（Atlas）也称作 Sprite Sheet 是游戏开发中常见的一种美术资源 图集是通过专门的工具将多张图片合并成一张大图，并通过 plist 等格式的文件索引的资源
+
+	推荐的图集制作软件包括：TexturePacker  Zwoptex
+
+	自动图集资源 Auto Atlas
+	自动图集资源 作为 Cocos Creator 自带的合图功能，可以将指定的一系列碎图打包成一张大图，具体作用和 Texture Packer 的功能很相近
+
+	艺术数字资源 LabelAtlas
+	艺术数字资源 是一种用户自定义的资源，它可以用来配置艺术数字字体的属性。
+
+	动态字体 Cocos Creator 支持 TTF 格式的动态字体 bf 位图资源
+
+	使用字体资源 使用菜单创建 Label（字体）节点
+	关联字体资源 可以将您的字体资源拖拽到创建的 Label 组件中的 Font 属性栏中
+
+	粒子资源 ParticleSystem
+	导入粒子资源 将 Cocos2d 支持的粒子 .plist 文件直接放到工程资源目录下
+	资源管理器 里将粒子资源直接赋给组件的 File 属性
+	 plist 文件中的 blendFuncSource 属性到下面的值：
+	 <key>blendFuncSource</key>
+    <integer>770</integer>
+
+    声音资源
+    Web Audio
+    通过 Web Audio 方式加载的声音资源，在引擎内是以一个 buffer 的形式缓存的。
+	这种方式的优点是兼容性好，问题比较少。缺点是占用的内存资源过多。
+	DOM Audio
+	通过生成一个标准的 audio 元素来播放声音资源，缓存的就是这个 audio 元素
+	使用标准的 audio 元素播放声音资源的时候，在某些浏览器上可能会遇到一些限制。比如：每次播放必须是用户操作事件内才允许播放（Web Audio 只要求第一次），且只允许播放一个声音资源等。
+	如果是比较大的音频如背景音乐，建议使用 DOM Audio
+
+	动态选择加载模式 cc.loader 进行加载。
+
+	音频默认是使用 Web Audio 的方式加载并播放的，只有在不支持的浏览器才会使用 DOM 模式。
+	cc.loader.load(cc.url.raw('resources/background.mp3'), callback);
+
+	骨骼动画资源（Spine）
+	导入骨骼动画资源
+	json 骨骼数据  .png 图集纹理   .txt/.atlas 图集数据
+	创建骨骼动画资源
+	第一种方式：从 资源管理器 里将骨骼动画资源拖动到层级管理器中
+	第二种方式：从 资源管理器 里将骨骼动画资源拖动到场景中
+	第二种方式： 资源管理器 里将骨骼动画资源拖动到已创建 Spine 组件中 Skeleton Data 属性中
+
+	为 DragonBones 组件设置图集数据：从 资源管理器 里将图集数据拖动到 DragonBones 组件的 Dragon Atlas Asset 属性中
+
+	瓦片图资源 TiledMap
+	创建瓦片图资源
+	第一种方式
+	第一种方式
+	第一种方式 从 资源管理器 里将地图资源拖动到已创建 TiledMap 组件的 Tmx File 属性中
+	
+	json
+	关联组件
+	 // 声明
+    npcList: {
+        default: null,
+        type: cc.JsonAsset,
+    },
+
+    // 读取
+    var json = this.npcList.json;
+    loadNpc(json);
+	动态加载
+	cc.loader.loadRes('configs/npc', function (err, jsonAsset) {
+        loadNpc(jsonAsset.json);
+    });
+
+    文本资源 .txt, .plist, .xml, .json, .yaml, .ini, .csv, .md  都会导入为 cc.TextAsset
 
 </body>
 </html>
