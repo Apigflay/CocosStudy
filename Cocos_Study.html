@@ -121,5 +121,90 @@
 
     文本资源 .txt, .plist, .xml, .json, .yaml, .ini, .csv, .md  都会导入为 cc.TextAsset
 
+
+    4-22
+    <div>场景制作工作流程</div>
+    1. 节点和组件
+    在一个节点上可以添加多个组件，来为节点添加更多功能,一个节点上只能添加一个渲染组件
+    2.锚点（Anchor）
+    3.
+    4.
+    脚本开发工作流程
+    1 创建组件脚本
+    2 使用 cc.Class 声明类型
+    需要做类型判断时，可以用 JavaScript 原生的 instanceof： cc.log(obj instanceof Sprite);       // true
+    3 使用 ctor 声明构造函数：
+    var Sprite = cc.Class({
+	    ctor: function () {
+	        cc.log(this instanceof Sprite);    // true
+	    }
+	});
+    4 实例方法
+    var Sprite = cc.Class({
+	    // 声明一个名叫 "print" 的实例方法
+	    print: function () { }
+	});
+	5 继承
+	// 父类
+	var Shape = cc.Class();
+
+	// 子类
+	var Rect = cc.Class({
+	    extends: Shape
+	});
+	6 父构造函数
+	var Shape = cc.Class({
+	    ctor: function () {
+	        cc.log("Shape");    // 实例化时，父构造函数会自动调用，
+	    }
+	});
+
+	var Rect = cc.Class({
+	    extends: Shape
+	});
+
+	var Square = cc.Class({
+	    extends: Rect,
+	    ctor: function () {
+	        cc.log("Square");   // 再调用子构造函数
+	    }
+	});
+
+	var square = new Square();
+	7 简单声明
+	当声明的属性为基本 JavaScript 类型时，可以直接赋予默认值：
+	properties: {
+	  height: 20,       // number
+	  type: "actor",    // string
+	  loaded: false,    // boolean                
+	  target: null,     // object
+	}
+	8 完整声明
+	properties: {
+	    score: {
+	        default: 0,
+	        displayName: "Score (player)",
+	        tooltip: "The score of player",
+	    }
+	}
+	常用参数：	default: 设置属性的默认值，这个默认值仅在组件第一次添加到节点上时才会用到
+				type: 限定属性的数据类型，详见 CCClass 进阶参考：type 参数
+				visible: 设为 false 则不在 属性检查器 面板中显示该属性
+				serializable: 设为 false 则不序列化（保存）该属性
+				displayName: 在 属性检查器 面板中显示成指定名字
+				tooltip: 在 属性检查器 面板中添加属性的 Tooltip
+	9 通过模块访问 module.exports  require("")
+	10 创建和销毁节点
+	新建节点 new cc.Node()
+	克隆节点 cc.instantiate
+	销毁节点 node.destroy()
+	destroy 和 removeFromParent 的区别：
+	调用一个节点的 removeFromParent 后，它不一定就能完全从内存中释放，因为有可能由于一些逻辑上的问题，导致程序中仍然引用到了这个对象。因此如果一个节点不再使用了，请直接调用它的 destroy 而不是 removeFromParent。destroy 不但会激活组件上的 onDestroy，还会降低内存泄露的几率，同时减轻内存泄露时的后果。
+	
+	发射事件
+	emit 和 dispatchEvent
+	
+
+
 </body>
 </html>
