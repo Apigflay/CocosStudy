@@ -201,9 +201,139 @@
 	destroy 和 removeFromParent 的区别：
 	调用一个节点的 removeFromParent 后，它不一定就能完全从内存中释放，因为有可能由于一些逻辑上的问题，导致程序中仍然引用到了这个对象。因此如果一个节点不再使用了，请直接调用它的 destroy 而不是 removeFromParent。destroy 不但会激活组件上的 onDestroy，还会降低内存泄露的几率，同时减轻内存泄露时的后果。
 	
-	发射事件
+	11 发射事件
 	emit 和 dispatchEvent
+	12 节点系统事件
+	Cocos Creator 支持的系统事件包含鼠标、触摸、键盘、重力传感四种
+	触摸事件冒泡
+	13 全局系统事件  键盘事件  设备重力传感事件
+	cc.SystemEvent.EventType.KEY_DOWN (键盘按下)
+	cc.SystemEvent.EventType.KEY_UP (键盘释放)
+	cc.SystemEvent.EventType.DEVICEMOTION (设备重力传感)
+	cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
+	14 在 Cocos Creator 中使用动作系统
+	// 创建一个移动动作
+	var action = cc.moveTo(2, 100, 100);
+	// 执行动作
+	node.runAction(action);
+	// 停止一个动作
+	node.stopAction(action);
+	// 停止所有动作
+	node.stopAllActions();
+
+	顺序动作 cc.sequence 顺序动作可以让一系列子动作按顺序一个个执行。示例
+	var seq = cc.sequence(cc.moveBy(0.5, 200, 0), cc.moveBy(0.5, -200, 0));
+ 	node.runAction(seq);
+
+ 	// 让节点在向上移动的同时缩放
+	var spawn = cc.spawn(cc.moveBy(0.5, 0, 50), cc.scaleTo(0.5, 0.8, 1.4));
+	node.runAction(spawn);
+
+	重复动作 cc.repeat 重复动作用来多次重复一个动作。示例：
+	// 让节点左右来回移动，并重复5次
+	 var seq = cc.repeat(
+	             cc.sequence(
+	                 cc.moveBy(2, 200, 0),
+	                 cc.moveBy(2, -200, 0)
+	             ), 5);
+	 node.runAction(seq);
+
+	永远重复动作 cc.repeatForever
+
+	速度动作 cc.speed
+
+	【15】
+	动作列表
+	容器动作 cc.sequence spawn repeat repeatForever speed
+	即时动作 cc.show hide toggleVisibility removeSelf flipX flipY place callFunc targetedAction
+	时间间隔动作 cc.moveTo moveBy rotateTo rotateBy scaleTo scaleBy skewTo skewBy jumpBy jumpTo follow bezierTo bezierBy
+	blink fadeTo fadeIn fadeOut tintTo tintBy delayTime reverseTime cardinalSplineTo cardinalSplineBy catmullRomTo catmullRomBy
+	缓动动作 easeIn 。。。。。。easeCubicActionInOut
+	【16】在 Cocos Creator 中使用缓动系统（cc.tween）
+	this.node.runAction(
+	    cc.sequence(
+	        cc.spawn(
+	            cc.moveTo(1, 100, 100),
+	            cc.rotateTo(1, 360),
+	        ),
+	        cc.scale(1, 2)
+	    )
+	)
+
+	cc.tween(this.node)
+    .to(1, { position: cc.v2(100, 100), rotation: 360 })
+    .to(1, { scale: 2 })
+    .start()
+	【17】使用计时器
+	 component.schedule(function() {
+	     // 这里的 this 指向 component
+	     this.doSomething();
+	 }, 5);
+
+	 下面是 Component 中所有关于计时器的函数：schedule  scheduleOnce  unschedule  unscheduleAllCallbacks
+	【18】脚本执行顺序
+	使用统一的控制脚本来初始化其他脚本
+	一般我都会有一个 Game.js 的脚本作为总的控制脚本，假如我还有 Player.js, Enemy.js, Menu.js 三个组件，那么他们的初始化过程是这样的：
+	// Game.js
+
+	const Player = require('Player');
+	const Enemy = require('Enemy');
+	const Menu = require('Menu');
+
+	cc.Class({
+	    extends: cc.Component,
+	    properties: {
+	        player: Player,
+	        enemy: Enemy,
+	        menu: Menu
+	    },
+
+	    onLoad: function () {
+	        this.player.init();
+	        this.enemy.init();
+	        this.menu.init();
+	    }
+	});
 	
+	在 Update 中用自定义方法控制更新顺序
+	同理如果要保证以上三个脚本的每帧更新顺序，我们也可以将分散在每个脚本里的 update 替换成自己定义的方法
+	// Player.js
+    updatePlayer: function (dt) {
+        // do player update
+    }
+    然后在 Game.js 脚本的 update 里调用这些方法：
+    // Game.js
+    update: function (dt) {
+        this.player.updatePlayer(dt);
+        this.enemy.updateEnemy(dt);
+        this.menu.updateMenu(dt);
+    }
+    设置组件执行优先级 如果以上方法还是不能提供所需的控制粒度，还可以直接设置组件的 executionOrder
+    cc.Class({
+    extends: cc.Component,
+	    editor: {
+	        executionOrder: -1
+	    },
+
+	    onLoad: function () {
+	        cc.log('Player onLoad!');
+	    }
+	});
+	【19】标准网络接口
+	XMLHttpRequest：用于短连接
+	WebSocket：用于长连接
+
+	开发者可以直接使用 new XMLHttpRequest() 来创建一个连接对象，也可以通过 cc.loader.getXMLHttpRequest() 来创建，两者效果一致
+
+	SocketIO
+	【20】使用对象池
+	在运行时进行节点的创建(cc.instantiate)和销毁(node.destroy)操作是非常耗费性能的，因此我们在比较复杂的场景中，通常只有在场景初始化逻辑（onLoad）中才会进行节点的创建，在切换场景时才会进行节点的销毁。
+
+	【21】模块化脚本
+	以同步的 require 方法来引用其它模块
+	设置 module.exports 为导出的变量
+	【22】
+	【23】【24】【25】【26】【27】
 
 
 </body>
